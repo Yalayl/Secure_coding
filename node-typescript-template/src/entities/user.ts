@@ -17,6 +17,7 @@ export class User {
 
     @Column()
     @IsNotEmpty()
+    @IsEmail()
     email!: string
 
     @Column()
