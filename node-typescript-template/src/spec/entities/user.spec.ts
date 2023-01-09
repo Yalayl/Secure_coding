@@ -39,11 +39,33 @@ describe('User', function () {
       user.firstname="jacques"
       user.lastname="paul"
       user.passwordHash="0000"
-      
+
       await chai.expect(repo.save(user)).to.eventually.be.rejected.and.deep.include({
         target: user,
         property: 'email',
         constraints: { isNotEmpty: 'email should not be empty' }
+      })
+    })
+
+    it('should raise error if email is not unique', async function () {
+      const repo=AppDataSource.getRepository(User)
+      const user = new User();
+      user.firstname = "jacques";
+      user.lastname = "paul";
+      user.email = "aze@gmail.com";
+      user.passwordHash = "0000";
+      await repo.save(user);
+
+      const user2 = new User();
+      user2.firstname = "Andre";
+      user2.lastname = "Michel";
+      user2.email = "aze@gmail.com";
+      user2.passwordHash = "0000";
+
+      await chai.expect(repo.save(user2)).to.eventually.be.rejected.and.deep.include({
+        target  : user2,
+        property: 'email',
+        constraints: { uniqueInColumn: 'email should not be duplicate' }
       })
     })
   })

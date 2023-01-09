@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, InsertEvent, EventSubscriber, EntitySubscriberInterface } from "typeorm"
-import {IsEmail, IsNotEmpty, validate, ValidationError} from "class-validator"
+import { Entity, PrimaryGeneratedColumn, Column, InsertEvent, EventSubscriber, EntitySubscriberInterface, UpdateEvent } from "typeorm"
+import {isEmail, IsEmail, IsNotEmpty, validate, ValidationError} from "class-validator"
+import { UniqueColumn } from "./Decorator"
 
 @Entity()
 export class User {
@@ -15,9 +16,11 @@ export class User {
     @IsNotEmpty()
     lastname!: string
 
-    @Column()
+    @Column({unique: true})
     @IsNotEmpty()
-    @IsEmail()
+    @UniqueColumn('email', {
+        message:'email should not be duplicate',
+      })
     email!: string
 
     @Column()
@@ -38,7 +41,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     async beforeInsert(event: InsertEvent<User>) {
         console.log(`BEFORE POST INSERTED: `, event.entity)
         const errors = await validate(event.entity)
-        console.log(errors)
         if (errors.length) {
             const error = new ValidationError()
             error.target=event.entity
@@ -48,4 +50,17 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
         }
         
     }
+
+    /*async beforeUpdate(event: UpdateEvent<User>) {
+        console.log(`BEFORE POST UPDATED: `, event.databaseEntity)
+        const errors = await validate(event.databaseEntity)
+        if (errors.length) {
+            const error = new ValidationError()
+            error.target=event.entity
+            error.property = 'email'
+            error.constraints= { isNotEmpty: 'email should not be empty' }
+            throw error
+        }
+        
+    }*/
 }
