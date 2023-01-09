@@ -39,7 +39,7 @@ describe('User', function () {
       user.firstname="jacques"
       user.lastname="paul"
       user.passwordHash="0000"
-
+      
       await chai.expect(repo.save(user)).to.eventually.be.rejected.and.deep.include({
         target: user,
         property: 'email',
